@@ -1,0 +1,447 @@
+@import "tailwindcss";
+
+/* ── Theme tokens ─────────────────────────────────────────────────────── */
+@theme {
+  --color-canvas:        #0C0A08;
+  --color-canvas-subtle: #131110;
+  --color-canvas-card:   #1C1814;
+
+  --color-ink:       #EDE8DF;
+  --color-ink-muted: #7B7267;
+  --color-ink-ghost: #2E2820;
+
+  --color-amber:       #C8963F;
+  --color-amber-light: #D4A850;
+  --color-flame:       #C26640;
+  --color-fern:        #6A8C72;
+
+  --color-edge:        #1E1B16;
+  --color-edge-strong: #2D2820;
+
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'Space Mono', monospace;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: auto; }
+
+  body {
+    @apply bg-canvas text-ink font-body antialiased overflow-x-hidden;
+    cursor: none;
+    line-height: 1.7;
+  }
+
+  a, button { cursor: none; }
+  img { display: block; max-width: 100%; }
+
+  ::selection { @apply bg-amber text-canvas; }
+
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { @apply bg-canvas; }
+  ::-webkit-scrollbar-thumb { @apply bg-edge-strong rounded-sm; }
+}
+
+/* ── Reusable component classes ───────────────────────────────────────── */
+@layer components {
+  .section-label {
+    @apply font-mono text-[0.62rem] tracking-[0.28em] uppercase text-amber mb-3 flex items-center gap-3;
+  }
+  .section-label::before {
+    content: '';
+    @apply block w-5 h-px bg-amber shrink-0;
+  }
+
+  .section-title {
+    @apply font-display font-bold text-ink;
+    font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .section-title em {
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    @apply text-ink-muted;
+  }
+}
+
+/* ── Page loader ──────────────────────────────────────────────────────── */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0C0A08;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+}
+
+.loader-diamond {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(200, 150, 63, 0.5);
+  transform: rotate(45deg);
+  margin-bottom: 0.8rem;
+}
+
+.loader-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(3.2rem, 8vw, 7rem);
+  letter-spacing: -0.02em;
+  color: #EDE8DF;
+  line-height: 1;
+  perspective: 600px;
+  display: flex;
+}
+
+.loader-char {
+  display: inline-block;
+  transform-origin: 50% 100%;
+}
+
+.loader-sep {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, transparent, rgba(200, 150, 63, 0.3), transparent);
+}
+
+.loader-bar-track {
+  width: clamp(180px, 60vw, 220px);
+  height: 1px;
+  background: #1E1B16;
+  position: relative;
+  overflow: hidden;
+}
+
+.loader-bar {
+  position: absolute;
+  inset: 0;
+  background: #C8963F;
+  transform: scaleX(0);
+  transform-origin: left;
+  box-shadow: 0 0 8px rgba(200, 150, 63, 0.4);
+}
+
+.loader-counter {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: #4A4540;
+}
+
+/* ── Site reveal wrapper ─────────────────────────────────────────────── */
+.site-reveal {
+  animation: siteReveal 0.5s ease forwards;
+}
+
+@keyframes siteReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Hero – scan line ────────────────────────────────────────────────── */
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(200, 150, 63, 0.9) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 18px 3px rgba(200, 150, 63, 0.25);
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* ── Scroll indicator ────────────────────────────────────────────────── */
+.scroll-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, #C8963F, transparent);
+  animation: scrollPulse 2.4s ease-in-out infinite;
+  transform-origin: top;
+}
+
+/* ── Skill tag ───────────────────────────────────────────────────────── */
+.skill-tag {
+  @apply font-mono text-[0.7rem] px-3 py-1.5 border border-edge-strong text-ink-muted transition-all duration-200;
+  letter-spacing: 0.03em;
+}
+.skill-tag:hover {
+  @apply border-amber text-amber;
+  background: rgba(200, 150, 63, 0.05);
+}
+
+/* ── Marquee item ────────────────────────────────────────────────────── */
+.marquee-item {
+  @apply font-display font-semibold text-ink-muted;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  padding: 0 2.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.marquee-item::after {
+  content: '◈';
+  font-size: 0.55rem;
+  color: #C8963F;
+  font-style: normal;
+}
+
+/* ── Hero depth orbs ─────────────────────────────────────────────────── */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-orb--1 {
+  width: 560px; height: 560px;
+  background: radial-gradient(circle, rgba(200, 150, 63, 0.1) 0%, transparent 70%);
+  filter: blur(80px);
+  left: -8%; top: -30%;
+  animation: orbFloat1 22s ease-in-out infinite;
+}
+
+.hero-orb--2 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(194, 102, 64, 0.08) 0%, transparent 70%);
+  filter: blur(70px);
+  right: 8%; top: 15%;
+  animation: orbFloat2 26s ease-in-out infinite;
+}
+
+.hero-orb--3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(106, 140, 114, 0.07) 0%, transparent 70%);
+  filter: blur(60px);
+  left: 42%; bottom: 8%;
+  animation: orbFloat3 19s ease-in-out infinite;
+}
+
+/* ── Hero floating diamonds ──────────────────────────────────────────── */
+.hero-float-diamond {
+  position: absolute;
+  border: 1px solid rgba(200, 150, 63, 0.22);
+  transform: rotate(45deg);
+  animation-name: particleDrift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* ── Hero floating rings ─────────────────────────────────────────────── */
+.hero-float-ring {
+  position: absolute;
+  border: 1px solid rgba(200, 150, 63, 0.14);
+  border-radius: 50%;
+  animation-name: particleDrift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* ── Hero ambient particles ──────────────────────────────────────────── */
+.hero-particle {
+  position: absolute;
+  background: rgba(200, 150, 63, 0.45);
+  border-radius: 50%;
+  animation-name: particleDrift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* ── Shared section depth particles ──────────────────────────────────── */
+.section-depth-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(200, 150, 63, 0.35);
+  pointer-events: none;
+  z-index: 0;
+  animation-name: particleDrift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* ── Button futuristic hover ─────────────────────────────────────────── */
+.btn-futuristic {
+  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-futuristic::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(#C8963F, #C8963F) top    left  / 10px 1px no-repeat,
+    linear-gradient(#C8963F, #C8963F) top    left  / 1px 10px no-repeat,
+    linear-gradient(#C8963F, #C8963F) top    right / 10px 1px no-repeat,
+    linear-gradient(#C8963F, #C8963F) top    right / 1px 10px no-repeat,
+    linear-gradient(#C8963F, #C8963F) bottom left  / 10px 1px no-repeat,
+    linear-gradient(#C8963F, #C8963F) bottom left  / 1px 10px no-repeat,
+    linear-gradient(#C8963F, #C8963F) bottom right / 10px 1px no-repeat,
+    linear-gradient(#C8963F, #C8963F) bottom right / 1px 10px no-repeat;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.btn-futuristic::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 15%,
+    rgba(200, 150, 63, 0.2) 50%,
+    transparent 85%
+  );
+  transform: skewX(-12deg);
+  pointer-events: none;
+}
+
+.btn-futuristic:hover {
+  box-shadow: 0 0 18px rgba(200, 150, 63, 0.14), 0 0 0 1px rgba(200, 150, 63, 0.1);
+}
+
+.btn-futuristic:hover::before { opacity: 1; }
+.btn-futuristic:hover::after  { animation: btnScan 0.5s ease forwards; }
+
+.btn-futuristic:active {
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+@keyframes btnScan {
+  to { left: 130%; }
+}
+
+/* ── Skills data-stream lines ────────────────────────────────────────── */
+.stream-line {
+  stroke-dasharray: 55 28;
+  animation-name: dataFlow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────── */
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.8; transform: scaleY(1); }
+  50%       { opacity: 0.2; transform: scaleY(0.55); }
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0,    0   ); }
+  33%       { transform: translate(55px, 80px); }
+  66%       { transform: translate(-25px, 40px); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0,     0    ); }
+  40%       { transform: translate(-65px, 55px ); }
+  70%       { transform: translate(35px, -45px ); }
+}
+
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0,    0    ); }
+  30%       { transform: translate(45px, -55px); }
+  65%       { transform: translate(-25px, 30px); }
+}
+
+@keyframes particleDrift {
+  0%   { transform: translate(0,     0    ); opacity: 0.2;  }
+  100% { transform: translate(18px, -32px ); opacity: 0.65; }
+}
+
+@keyframes dataFlow {
+  to { stroke-dashoffset: -83; }
+}
+
+@keyframes slowSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.07; }
+  50%       { opacity: 0.14; }
+}
+
+/* ── Responsive section layout grids ─────────────────────────────────── */
+
+/* About: sidebar + content */
+.about-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+@media (min-width: 768px) {
+  .about-layout-grid {
+    grid-template-columns: 220px 1fr;
+    gap: 7rem;
+  }
+}
+
+.about-sticky-col {
+  align-self: start;
+}
+@media (min-width: 768px) {
+  .about-sticky-col {
+    position: sticky;
+    top: 9rem;
+  }
+}
+
+/* Experience: date + content */
+.exp-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .exp-layout-grid {
+    grid-template-columns: 180px 1fr;
+    gap: 5rem;
+  }
+}
+
+/* Projects: number + content + links */
+.project-layout-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+.project-layout-row .proj-links {
+  align-items: flex-start;
+}
+@media (min-width: 768px) {
+  .project-layout-row {
+    grid-template-columns: 64px 1fr 110px;
+    gap: 2.5rem;
+  }
+  .project-layout-row .proj-links {
+    align-items: flex-end;
+  }
+}
+
+/* Mobile: hide hero orbs */
+@media (max-width: 639px) {
+  .hero-orb { display: none; }
+}
