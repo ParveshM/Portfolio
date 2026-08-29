@@ -101,6 +101,13 @@
   display: flex;
 }
 
+@media (max-width: 480px) {
+  .loader-name {
+    font-size: clamp(2rem, 10vw, 3.2rem);
+    letter-spacing: -0.01em;
+  }
+}
+
 .loader-char {
   display: inline-block;
   transform-origin: 50% 100%;
@@ -146,7 +153,7 @@
   to   { opacity: 1; }
 }
 
-/* ── Hero – scan line ────────────────────────────────────────────────── */
+/* ── Hero - scan line ────────────────────────────────────────────────── */
 .scan-line {
   position: absolute;
   left: 0; right: 0;
@@ -194,7 +201,7 @@
   text-transform: uppercase;
 }
 .marquee-item::after {
-  content: '◈';
+  content: '�-�';
   font-size: 0.55rem;
   color: #C8963F;
   font-style: normal;

@@ -1,102 +1,111 @@
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const stats = [
-  { value: '1+', label: 'Years Experience' },
-  { value: '4+', label: 'Projects Delivered' },
-  { value: '2+', label: 'Clients Served' },
-]
+  { value: "1.5+", label: "Years Experience" },
+  { value: "4+", label: "Projects Delivered" },
+  { value: "2+", label: "Clients Served" },
+];
 
 const ABOUT_PARTICLES = [
   { x: 82, y: 12, size: 1.5, delay: 1.2, dur: 10 },
-  { x: 93, y: 38, size: 1,   delay: 3.5, dur: 13 },
-  { x: 76, y: 65, size: 2,   delay: 0.5, dur: 9  },
-  { x: 96, y: 82, size: 1,   delay: 5.2, dur: 11 },
-  { x: 71, y: 50, size: 1.5, delay: 2.8, dur: 8  },
-]
+  { x: 93, y: 38, size: 1, delay: 3.5, dur: 13 },
+  { x: 76, y: 65, size: 2, delay: 0.5, dur: 9 },
+  { x: 96, y: 82, size: 1, delay: 5.2, dur: 11 },
+  { x: 71, y: 50, size: 1.5, delay: 2.8, dur: 8 },
+];
 
 export default function About() {
-  const ref = useRef(null)
+  const ref = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from('.about-left-col', {
+      gsap.from(".about-left-col", {
         opacity: 0,
         x: -40,
         duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.about-grid', start: 'top 78%' },
-      })
+        ease: "power3.out",
+        scrollTrigger: { trigger: ".about-grid", start: "top 78%" },
+      });
 
-      gsap.from('.about-right-col > *', {
+      gsap.from(".about-right-col > *", {
         opacity: 0,
         y: 28,
         duration: 0.8,
         stagger: 0.12,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.about-right-col', start: 'top 82%' },
-      })
+        ease: "power3.out",
+        scrollTrigger: { trigger: ".about-right-col", start: "top 82%" },
+      });
 
-      // Bracket paths — scroll-linked draw
-      const brackets = gsap.utils.toArray('.about-bracket-path', ref.current)
+      // Bracket paths - scroll-linked draw
+      const brackets = gsap.utils.toArray(".about-bracket-path", ref.current);
       const bracketTl = gsap.timeline({
         scrollTrigger: {
           trigger: ref.current,
-          start: 'top 82%',
-          end: 'top 15%',
+          start: "top 82%",
+          end: "top 15%",
           scrub: 1.5,
         },
-      })
+      });
       brackets.forEach((el, i) => {
-        const len = el.getTotalLength()
-        gsap.set(el, { strokeDasharray: len, strokeDashoffset: len })
-        bracketTl.to(el, { strokeDashoffset: 0, ease: 'none' }, i * 0.5)
-      })
+        const len = el.getTotalLength();
+        gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
+        bracketTl.to(el, { strokeDashoffset: 0, ease: "none" }, i * 0.5);
+      });
 
-      // Circuit trace — scroll-linked draw
-      const circuitMain = ref.current.querySelector('.about-circuit-main')
+      // Circuit trace - scroll-linked draw
+      const circuitMain = ref.current.querySelector(".about-circuit-main");
       if (circuitMain) {
-        const len = circuitMain.getTotalLength()
-        gsap.set(circuitMain, { strokeDasharray: len, strokeDashoffset: len })
+        const len = circuitMain.getTotalLength();
+        gsap.set(circuitMain, { strokeDasharray: len, strokeDashoffset: len });
         gsap.to(circuitMain, {
           strokeDashoffset: 0,
-          ease: 'none',
+          ease: "none",
           scrollTrigger: {
             trigger: ref.current,
-            start: 'top 85%',
-            end: 'bottom 25%',
+            start: "top 85%",
+            end: "bottom 25%",
             scrub: 2,
           },
-        })
+        });
       }
 
-      // Circuit nodes — appear progressively as you scroll
-      const circuitNodes = gsap.utils.toArray('.about-circuit-node', ref.current)
+      // Circuit nodes - appear progressively as you scroll
+      const circuitNodes = gsap.utils.toArray(
+        ".about-circuit-node",
+        ref.current,
+      );
       const nodeTl = gsap.timeline({
         scrollTrigger: {
           trigger: ref.current,
-          start: 'top 75%',
-          end: 'center 30%',
+          start: "top 75%",
+          end: "center 30%",
           scrub: 1.5,
         },
-      })
+      });
       circuitNodes.forEach((el, i) => {
-        nodeTl.fromTo(el,
+        nodeTl.fromTo(
+          el,
           { opacity: 0, scale: 0 },
-          { opacity: 1, scale: 1, ease: 'power2.out', transformOrigin: 'center center' },
-          i * 0.3
-        )
-      })
-    }, ref)
+          {
+            opacity: 1,
+            scale: 1,
+            ease: "power2.out",
+            transformOrigin: "center center",
+          },
+          i * 0.3,
+        );
+      });
+    }, ref);
 
-    return () => ctx.revert()
-  }, [])
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section ref={ref} id="about" className="relative bg-canvas py-32">
+    <section ref={ref} id="about" className="relative bg-canvas py-16 md:py-32">
       {/* Floating particles */}
       {ABOUT_PARTICLES.map((p, i) => (
         <div
@@ -113,11 +122,11 @@ export default function About() {
         />
       ))}
 
-      {/* Left-edge circuit trace — draws on scroll */}
+      {/* Left-edge circuit trace - draws on scroll */}
       <svg
         aria-hidden="true"
         className="hidden lg:block absolute top-0 left-4 pointer-events-none z-0"
-        style={{ height: '900px', width: '40px' }}
+        style={{ height: "900px", width: "40px" }}
         viewBox="0 0 40 900"
         fill="none"
       >
@@ -129,10 +138,36 @@ export default function About() {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle className="about-circuit-node" cx="20" cy="190" r="2.5" fill="none" stroke="rgba(200,150,63,0.22)" strokeWidth="1" />
-        <circle className="about-circuit-node" cx="32" cy="295" r="2"   fill="rgba(200,150,63,0.14)" />
-        <circle className="about-circuit-node" cx="8"  cy="555" r="2"   fill="rgba(106,140,114,0.16)" />
-        <circle className="about-circuit-node" cx="20" cy="450" r="1.5" fill="rgba(200,150,63,0.12)" />
+        <circle
+          className="about-circuit-node"
+          cx="20"
+          cy="190"
+          r="2.5"
+          fill="none"
+          stroke="rgba(200,150,63,0.22)"
+          strokeWidth="1"
+        />
+        <circle
+          className="about-circuit-node"
+          cx="32"
+          cy="295"
+          r="2"
+          fill="rgba(200,150,63,0.14)"
+        />
+        <circle
+          className="about-circuit-node"
+          cx="8"
+          cy="555"
+          r="2"
+          fill="rgba(106,140,114,0.16)"
+        />
+        <circle
+          className="about-circuit-node"
+          cx="20"
+          cy="450"
+          r="1.5"
+          fill="rgba(200,150,63,0.12)"
+        />
       </svg>
 
       {/* Bracket SVG */}
@@ -166,18 +201,25 @@ export default function About() {
         </div>
 
         <div className="about-grid about-layout-grid">
-          {/* Left col — sticky on desktop, inline on mobile */}
+          {/* Left col - sticky on desktop, inline on mobile */}
           <div className="about-left-col about-sticky-col">
             <div
               className="font-display font-extrabold text-ink-ghost mb-10 select-none"
-              style={{ fontSize: 'clamp(5rem, 10vw, 9rem)', lineHeight: 1, letterSpacing: '-0.04em' }}
+              style={{
+                fontSize: "clamp(5rem, 10vw, 9rem)",
+                lineHeight: 1,
+                letterSpacing: "-0.04em",
+              }}
             >
               01
             </div>
             <div className="flex flex-col gap-7">
               {stats.map((s) => (
-                <div key={s.label} className="border-l-2 border-edge-strong pl-5">
-                  <div className="font-display text-[2.4rem] font-medium text-amber leading-none">
+                <div
+                  key={s.label}
+                  className="border-l-2 border-edge-strong pl-5"
+                >
+                  <div className="text-[2.4rem] font-medium text-amber leading-none">
                     {s.value}
                   </div>
                   <div className="font-mono text-[0.65rem] tracking-[0.16em] uppercase text-ink-muted mt-1.5">
@@ -194,22 +236,28 @@ export default function About() {
 
             <div className="text-[1.05rem] text-ink leading-[1.85] mb-10 space-y-5">
               <p>
-                I'm a{' '}
-                <span className="text-amber-light font-medium">Full Stack Developer</span> with
-                a passion for building web applications that are as fast as they are beautiful.
-                My core expertise lies in the React ecosystem - crafting interfaces that feel
-                effortless to use and exceptional to look at.
+                I'm a{" "}
+                <span className="text-amber-light font-medium">
+                  Full Stack Developer
+                </span>{" "}
+                with a passion for building web applications that are as fast as
+                they are beautiful. My core expertise lies in the React
+                ecosystem - crafting interfaces that feel effortless to use and
+                exceptional to look at.
               </p>
               <p>
-                Over the past year in professional development, I've shipped production features
-                across{' '}
-                <span className="text-amber-light font-medium">e-commerce, blockchain, and real-time platforms</span>{' '}.
-                I write code that scales.
+                Over the past year in professional development, I've shipped
+                production features across{" "}
+                <span className="text-amber-light font-medium">
+                  e-commerce, blockchain, and real-time platforms
+                </span>
+                . I’m not just someone who writes code - I’m a problem solver
+                who uses code to build practical, scalable solutions.
               </p>
               <p>
-                Whether it's a client's first product or a complex integration, I bring the
-                same attention to detail: clean architecture, performant code, and visuals
-                that convert.
+                Whether it's a client's first product or a complex integration,
+                I bring the same attention to detail: clean architecture,
+                performant code, and solutions that deliver real value.
               </p>
             </div>
 
@@ -222,5 +270,5 @@ export default function About() {
         </div>
       </div>
     </section>
-  )
+  );
 }
