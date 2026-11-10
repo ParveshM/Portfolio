@@ -1,18 +1,22 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ArrowUpRight, Download, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { EMAIL, RESUME_URL, SOCIALS } from '@/lib/site'
+import { prefersReducedMotion } from '@/lib/motion'
 
-const socials = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/muhammed-parvesh-m/' },
-  { label: 'GitHub',   href: 'https://github.com/ParveshM'              },
-  { label: 'Email',    href: 'mailto:muhammedparveshm@gmail.com'         },
-]
+const secondaryLink =
+  'inline-flex items-center gap-1.5 font-mono text-[0.75rem] tracking-[0.18em] uppercase text-ink-muted hover:text-amber transition-colors duration-300 py-2'
 
 export default function Contact() {
   const ref = useRef(null)
 
   useEffect(() => {
+    if (prefersReducedMotion()) {
+      gsap.set('.contact-depth-orb', { opacity: 1 })
+      return
+    }
+
     const ctx = gsap.context(() => {
 
       // ── Existing content reveal ──────────────────────────────────────
@@ -114,7 +118,7 @@ export default function Contact() {
         <div className="contact-inner flex flex-col items-center">
 
           {/* Eyebrow */}
-          <div className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-amber mb-8 flex items-center gap-4">
+          <div className="font-mono text-[0.75rem] tracking-[0.28em] uppercase text-amber mb-8 flex items-center gap-4">
             <span className="block w-9 h-px bg-amber" />
             Get In Touch
             <span className="block w-9 h-px bg-amber" />
@@ -127,22 +131,38 @@ export default function Contact() {
           >
             Let's work
             <br />
-            <em className="italic text-ink-muted">together</em>
+            <em className="not-italic font-semibold text-amber">together</em>
           </h2>
 
-          <p className="text-[0.92rem] text-ink-muted max-w-sm leading-[1.65] mb-8 md:mb-12">
+          <p className="text-[0.98rem] text-ink-muted max-w-sm leading-[1.65] mb-9 md:mb-12">
             Open to freelance projects, full-time roles, and interesting collaborations.
           </p>
 
-          {/* Social links */}
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            {socials.map((s) => (
-              <Button key={s.label} asChild variant="default" size="sm">
-                <a href={s.href} target="_blank" rel="noreferrer">
-                  {s.label} ↗
-                </a>
-              </Button>
+          {/* Primary action */}
+          <Button asChild variant="amber" size="lg">
+            <a href={`mailto:${EMAIL}`}>
+              <Mail size={15} aria-hidden="true" />
+              Email me
+            </a>
+          </Button>
+          <p className="font-mono text-[0.8rem] tracking-[0.04em] text-ink-muted mt-4 select-all break-all">
+            {EMAIL}
+          </p>
+
+          {/* Secondary channels */}
+          <div className="flex items-center justify-center gap-x-8 gap-y-1 flex-wrap mt-8">
+            {SOCIALS.map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noreferrer" className={secondaryLink}>
+                {s.label}
+                <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
             ))}
+            {RESUME_URL && (
+              <a href={RESUME_URL} download className={secondaryLink}>
+                Resume
+                <Download size={14} aria-hidden="true" />
+              </a>
+            )}
           </div>
 
         </div>

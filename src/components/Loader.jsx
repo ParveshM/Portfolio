@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { prefersReducedMotion } from '@/lib/motion'
 
 const NAME = 'PARVESH.'
 
@@ -12,6 +13,13 @@ export default function Loader({ onComplete }) {
 
   useEffect(() => {
     const el = ref.current
+
+    // Reduced motion: no intro sequence, content appears immediately.
+    if (prefersReducedMotion()) {
+      el.style.display = 'none'
+      onComplete?.()
+      return
+    }
 
     // Build individual character spans
     nameRef.current.innerHTML = NAME.split('').map(ch =>

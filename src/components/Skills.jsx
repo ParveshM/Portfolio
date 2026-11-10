@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/lib/motion";
 
 const skillGroups = [
   {
@@ -87,6 +87,8 @@ export default function Skills() {
   const row2Ref = useRef(null);
 
   useEffect(() => {
+    if (prefersReducedMotion()) return;
+
     const ctx = gsap.context(() => {
       gsap.from(".skill-group-item", {
         opacity: 0,
@@ -288,13 +290,13 @@ export default function Skills() {
         <div className="mb-14">
           <div className="section-label">Skills</div>
           <h2 className="section-title">
-            My <em>toolkit</em>
+            What I <em>build with</em>
           </h2>
         </div>
       </div>
 
       {/* Scroll-parallax rows */}
-      <div className="overflow-hidden border-t border-b border-edge mb-16">
+      <div className="overflow-hidden border-t border-b border-edge mb-16" aria-hidden="true">
         {/* Row 1 - drifts left as you scroll down */}
         <div
           ref={row1Ref}
@@ -324,7 +326,7 @@ export default function Skills() {
         <div className="skills-grid grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-10 sm:gap-y-12">
           {skillGroups.map((group) => (
             <div key={group.title} className="skill-group-item">
-              <div className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-amber mb-5 pb-3 border-b border-edge">
+              <div className="font-mono text-[0.75rem] tracking-[0.22em] uppercase text-amber mb-5 pb-3 border-b border-edge">
                 {group.title}
               </div>
               <div className="flex flex-wrap gap-2">

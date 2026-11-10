@@ -12,6 +12,7 @@ import Projects from './components/Projects'
 import Experience from './components/Experience'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import { prefersReducedMotion } from './lib/motion'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -19,6 +20,9 @@ export default function App() {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    // Reduced motion: native scrolling, no smoothing
+    if (prefersReducedMotion()) return
+
     const lenis = new Lenis({
       duration: 1.4,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

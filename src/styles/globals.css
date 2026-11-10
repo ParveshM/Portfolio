@@ -7,7 +7,9 @@
   --color-canvas-card:   #1C1814;
 
   --color-ink:       #EDE8DF;
-  --color-ink-muted: #7B7267;
+  /* ink-muted clears 4.5:1 on canvas (5.6:1) and canvas-card (5.0:1) */
+  --color-ink-muted: #918778;
+  /* ink-ghost is decoration only (aria-hidden numerals); never for information */
   --color-ink-ghost: #2E2820;
 
   --color-amber:       #C8963F;
@@ -31,14 +33,26 @@
 
   body {
     @apply bg-canvas text-ink font-body antialiased overflow-x-hidden;
-    cursor: none;
     line-height: 1.7;
   }
 
-  a, button { cursor: none; }
+  /* Native pointer is hidden only once the custom cursor has actually mounted
+     (Cursor.jsx adds the class); if it fails, visitors keep a real pointer. */
+  html.has-custom-cursor body,
+  html.has-custom-cursor a,
+  html.has-custom-cursor button { cursor: none; }
+
   img { display: block; max-width: 100%; }
 
   ::selection { @apply bg-amber text-canvas; }
+
+  /* Keyboard focus — amber ring, offset clear of borders */
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 4px;
+    border-radius: 1px;
+  }
+  :focus:not(:focus-visible) { outline: none; }
 
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { @apply bg-canvas; }
@@ -48,7 +62,7 @@
 /* ── Reusable component classes ───────────────────────────────────────── */
 @layer components {
   .section-label {
-    @apply font-mono text-[0.62rem] tracking-[0.28em] uppercase text-amber mb-3 flex items-center gap-3;
+    @apply font-mono text-[0.75rem] tracking-[0.24em] uppercase text-amber mb-3 flex items-center gap-3;
   }
   .section-label::before {
     content: '';
@@ -138,9 +152,9 @@
 
 .loader-counter {
   font-family: 'Space Mono', monospace;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   letter-spacing: 0.22em;
-  color: #4A4540;
+  color: var(--color-ink-muted);
 }
 
 /* ── Site reveal wrapper ─────────────────────────────────────────────── */
@@ -179,7 +193,7 @@
 
 /* ── Skill tag ───────────────────────────────────────────────────────── */
 .skill-tag {
-  @apply font-mono text-[0.7rem] px-3 py-1.5 border border-edge-strong text-ink-muted transition-all duration-200;
+  @apply font-mono text-[0.75rem] px-3 py-1.5 border border-edge-strong text-ink-muted transition-all duration-200;
   letter-spacing: 0.03em;
 }
 .skill-tag:hover {
@@ -200,11 +214,14 @@
   white-space: nowrap;
   text-transform: uppercase;
 }
+/* Separator: a drawn hollow diamond, echoing the cursor and loader motif */
 .marquee-item::after {
-  content: '�-�';
-  font-size: 0.55rem;
-  color: #C8963F;
-  font-style: normal;
+  content: '';
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--color-amber);
+  transform: rotate(45deg);
+  flex-shrink: 0;
 }
 
 /* ── Hero depth orbs ─────────────────────────────────────────────────── */
@@ -416,39 +433,163 @@
   }
 }
 
-/* Experience: date + content */
-.exp-layout-grid {
+/* Experience: one row per role — date | content.
+   Rows have no gap so the content column's border reads as one timeline;
+   spacing lives in each entry's bottom padding. */
+.exp-row {
   display: grid;
   grid-template-columns: 1fr;
+}
+.exp-row .exp-entry { padding-bottom: 3.5rem; }
+.exp-row:last-child .exp-entry { padding-bottom: 0.5rem; }
+.exp-line { left: 0; }
+@media (min-width: 768px) {
+  .exp-row {
+    grid-template-columns: 240px minmax(0, 1fr);
+    column-gap: 4rem;
+  }
+  .exp-row .exp-entry { padding-bottom: 6rem; }
+  .exp-line { left: calc(240px + 4rem); }
+}
+
+/* ── Projects ────────────────────────────────────────────────────────── */
+
+/* Featured case: screenshot + story */
+.proj-featured {
+  display: grid;
   gap: 2rem;
 }
-@media (min-width: 768px) {
-  .exp-layout-grid {
-    grid-template-columns: 180px 1fr;
-    gap: 5rem;
+@media (min-width: 1024px) {
+  .proj-featured {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 4rem;
+    align-items: center;
   }
 }
 
-/* Projects: number + content + links */
+/* Screenshot frame — a quiet browser chrome so the shot reads as a live site */
+.proj-shot {
+  position: relative;
+  display: block;
+  border: 1px solid var(--color-edge-strong);
+  background: var(--color-canvas-card);
+  overflow: hidden;
+  transition: border-color 0.4s ease;
+}
+.proj-shot:hover { border-color: rgba(200, 150, 63, 0.55); }
+.proj-shot-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--color-edge-strong);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+}
+.proj-shot-bar::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--color-amber);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.proj-shot img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top left;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.proj-shot:hover img { transform: scale(1.03); }
+
+/* Delivery pipeline: vertical on small screens, horizontal from lg */
+.pipeline {
+  position: relative;
+  display: grid;
+  gap: 1.75rem;
+  padding-left: 1.9rem;
+  list-style: none;
+  margin: 0;
+}
+.pipeline-track {
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--color-edge-strong);
+  overflow: hidden;
+}
+.pipeline-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-amber);
+  transform-origin: top;
+}
+.pipeline-step { position: relative; }
+.pipeline-node {
+  position: absolute;
+  left: -1.9rem;
+  top: 0.32rem;
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--color-amber);
+  background: var(--color-canvas);
+  transform: rotate(45deg);
+}
+@media (min-width: 1024px) {
+  .pipeline {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2rem;
+    padding-left: 0;
+    padding-top: 2.25rem;
+  }
+  .pipeline-track {
+    left: 5px;
+    right: 5px;
+    top: 5px;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+  .pipeline-fill { transform-origin: left; }
+  .pipeline-node { left: 0; top: -2.25rem; }
+}
+
+/* Other projects: thumbnail + content + links */
 .project-layout-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.5rem;
-}
-.project-layout-row .proj-links {
-  align-items: flex-start;
+  gap: 1.25rem;
 }
 @media (min-width: 768px) {
   .project-layout-row {
-    grid-template-columns: 64px 1fr 110px;
+    grid-template-columns: 300px minmax(0, 1fr) auto;
     gap: 2.5rem;
+    align-items: start;
   }
-  .project-layout-row .proj-links {
-    align-items: flex-end;
+  .project-layout-row--text {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
 
 /* Mobile: hide hero orbs */
 @media (max-width: 639px) {
   .hero-orb { display: none; }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+/* Ambient loops settle on their end frame; transitions become instant.
+   GSAP work is skipped in JS via src/lib/motion.js. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
