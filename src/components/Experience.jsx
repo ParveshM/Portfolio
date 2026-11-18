@@ -1,24 +1,25 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Award } from "lucide-react";
+import { prefersReducedMotion } from "@/lib/motion";
 
 const experiences = [
   {
     year: "2025",
-    dateRange: "Dec 2025\n- Present",
+    dateRange: "Dec 2025 – Present",
     company: "NeenOpal",
     role: "React Developer",
     description:
       "Working on GAfix.ai, an automated GA4 and GTM auditing platform, contributing to React-based applications with a focus on scalable component architecture, performance optimization, and clean UI delivery.",
-    achievements: ["✦ SPECIAL MENTION Award · Q2 2026"],
+    achievements: ["Special Mention Award · Q2 2026"],
   },
   {
     year: "2024",
-    dateRange: "Sep 2024\n- Sep 2025",
+    dateRange: "Sep 2024 – Sep 2025",
     company: "369 Degree",
     role: "Full Stack Developer",
     description:
-      "Shipped across a broad range of client projects - blockchain platforms with Ethereum wallet integrations, multi-vendor e-commerce apps, real-time token marketplaces, and biometric verification systems. Handled frontend, backend, and third-party API integrations end to end.",
+      "Shipped across a broad range of client projects — blockchain platforms with Ethereum wallet integrations, multi-vendor e-commerce apps, real-time token marketplaces, and biometric verification systems. Handled frontend, backend, and third-party API integrations end to end.",
   },
 ];
 
@@ -31,11 +32,36 @@ const ORBITAL_NODES = [
   { cx: 150, cy: 160, r: 1.5, delay: 3, dur: 10 },
 ];
 
+function ExpDate({ exp, compact = false }) {
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        className="font-display font-extrabold text-ink-ghost leading-none select-none mb-3"
+        style={{
+          fontSize: compact ? "2.75rem" : "clamp(2.8rem, 4vw, 3.4rem)",
+          letterSpacing: "-0.03em",
+        }}
+      >
+        {exp.year}
+      </div>
+      <div className="font-mono text-[0.75rem] tracking-[0.12em] uppercase text-ink-muted tabular-nums">
+        {exp.dateRange}
+      </div>
+    </>
+  );
+}
+
 export default function Experience() {
   const ref = useRef(null);
   const lineRef = useRef(null);
 
   useEffect(() => {
+    if (prefersReducedMotion()) {
+      gsap.set(lineRef.current, { scaleY: 1 });
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // Single amber line grows from top to bottom
       gsap.fromTo(
@@ -46,7 +72,7 @@ export default function Experience() {
           ease: "none",
           transformOrigin: "top",
           scrollTrigger: {
-            trigger: ".exp-content-col",
+            trigger: ".exp-entries",
             start: "top 80%",
             end: "bottom 55%",
             scrub: 1.5,
@@ -62,7 +88,7 @@ export default function Experience() {
         stagger: 0.35,
         ease: "back.out(2)",
         transformOrigin: "center",
-        scrollTrigger: { trigger: ".exp-content-col", start: "top 78%" },
+        scrollTrigger: { trigger: ".exp-entries", start: "top 78%" },
       });
 
       // Date column slides in
@@ -76,13 +102,15 @@ export default function Experience() {
       });
 
       // Content entries fade up
-      gsap.from(".exp-entry > *", {
+      // (nodes and the inline date have their own tweens; two `from` tweens on
+      // one element would lock it at opacity 0)
+      gsap.from(".exp-entry > :not(.exp-node):not(.exp-date-col)", {
         opacity: 0,
         y: 20,
         duration: 0.6,
         stagger: 0.07,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".exp-content-col", start: "top 78%" },
+        scrollTrigger: { trigger: ".exp-entries", start: "top 78%" },
       });
 
       // Orbital nodes pulse
@@ -230,92 +258,77 @@ export default function Experience() {
           </h2>
         </div>
 
-        {/* Outer 2-col grid: dates | content */}
-        <div className="exp-entries exp-layout-grid">
-          {/* ── Left: stacked date blocks ─────────────────────── */}
-          <div className="hidden md:flex flex-col gap-24">
-            {experiences.map((exp, i) => (
-              <div key={i} className="exp-date-col">
-                <div
-                  className="font-display font-extrabold text-ink-ghost leading-none mb-3 select-none"
-                  style={{
-                    fontSize: "clamp(4rem, 7vw, 5.5rem)",
-                    letterSpacing: "-0.03em",
-                  }}
-                >
-                  {exp.year}
-                </div>
-                <div className="font-mono text-[0.65rem] tracking-[0.14em] uppercase text-ink-muted leading-relaxed">
-                  {exp.dateRange}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Right: single border + single line + nodes ──────── */}
+        {/* One row per role: date | content, so each date stays level with its entry */}
+        <div className="exp-entries relative">
+          {/* Single amber fill line, drawn down the timeline on scroll */}
           <div
-            className="exp-content-col relative pl-5 md:pl-14"
-            style={{ borderLeft: "1px solid #2D2820" }}
-          >
-            {/* Single amber fill line */}
-            <div
-              ref={lineRef}
-              className="absolute left-0 top-0 w-px bg-amber"
-              style={{
-                height: "100%",
-                transform: "scaleY(0)",
-                transformOrigin: "top",
-              }}
-            />
+            ref={lineRef}
+            aria-hidden="true"
+            className="exp-line absolute top-0 w-px bg-amber z-[1]"
+            style={{
+              height: "100%",
+              transform: "scaleY(0)",
+              transformOrigin: "top",
+            }}
+          />
 
-            <div className="flex flex-col gap-10 md:gap-24">
-              {experiences.map((exp, i) => (
-                <div key={i} className="exp-entry relative">
-                  <div className="block md:hidden exp-date-col">
-                    <div
-                      className="font-display font-extrabold text-ink-ghost leading-none mb-3 select-none"
-                      style={{
-                        fontSize: "clamp(4rem, 7vw, 5.5rem)",
-                        letterSpacing: "-0.03em",
-                      }}
-                    >
-                      {exp.year}
-                    </div>
-                    <div className="font-mono text-[0.65rem] tracking-[0.14em] uppercase text-ink-muted leading-relaxed">
-                      {exp.dateRange}
-                    </div>
-                  </div>
-                  {/* Checkpoint node */}
-                  <div
-                    className="exp-node hidden md:block absolute w-3 h-3 rounded-full bg-canvas-subtle z-10"
-                    style={{
-                      left: "-7px",
-                      top: "12px",
-                      border: "2px solid rgb(200,150,63)",
-                    }}
-                  />
+          <ol className="list-none">
+          {experiences.map((exp) => (
+            <li key={exp.company} className="exp-row">
+              {/* Date — own column from md */}
+              <div className="exp-date-col hidden md:block">
+                <ExpDate exp={exp} />
+              </div>
 
-                  <div className="font-mono text-[0.65rem] tracking-[0.22em] uppercase text-amber mb-2">
-                    {exp.company}
-                  </div>
-
-                  <h3
-                    className="font-display font-normal text-ink mb-5 leading-tight"
-                    style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}
-                  >
-                    {exp.role}
-                  </h3>
-
-                  <p className="text-[0.9rem] text-ink-muted max-w-lg leading-[1.75]">
-                    {exp.description}
-                  </p>
-                  <p className="font-mono text-[0.9rem] text-ink/90 max-w-lg leading-[1.75] mt-2">
-                    {exp.achievements?.join(" ")}
-                  </p>
+              <div className="exp-entry relative border-l border-edge-strong pl-5 md:pl-14">
+                {/* Date — inline on small screens */}
+                <div className="exp-date-col md:hidden mb-5">
+                  <ExpDate exp={exp} compact />
                 </div>
-              ))}
-            </div>
-          </div>
+
+                {/* Checkpoint node */}
+                <div
+                  aria-hidden="true"
+                  className="exp-node hidden md:block absolute w-3 h-3 rounded-full bg-canvas-subtle z-10"
+                  style={{
+                    left: "-6.5px",
+                    top: "5px",
+                    border: "2px solid rgb(200,150,63)",
+                  }}
+                />
+
+                <div className="font-mono text-[0.75rem] tracking-[0.2em] uppercase text-amber mb-2">
+                  {exp.company}
+                </div>
+
+                <h3
+                  className="font-display font-normal text-ink mb-5 leading-tight"
+                  style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}
+                >
+                  {exp.role}
+                </h3>
+
+                <p className="text-[0.92rem] text-ink-muted max-w-[34rem] leading-[1.75] text-pretty">
+                  {exp.description}
+                </p>
+
+                {exp.achievements && (
+                  <ul className="list-none mt-5 flex flex-col gap-2">
+                    {exp.achievements.map((a) => (
+                      <li
+                        key={a}
+                        className="inline-flex items-center gap-2.5 font-mono text-[0.78rem] tracking-[0.12em] uppercase text-ink"
+                      >
+                        <Award size={15} aria-hidden="true" className="text-amber shrink-0" />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+          </ol>
         </div>
       </div>
     </section>

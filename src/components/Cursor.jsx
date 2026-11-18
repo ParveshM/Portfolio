@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { prefersReducedMotion } from '@/lib/motion'
 
 const SECTIONS = ['hero', 'about', 'skills', 'projects', 'experience', 'contact']
 
@@ -26,10 +27,15 @@ export default function Cursor() {
   const hoverRef   = useRef(false)
 
   useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) return
+    // Touch devices and reduced-motion visitors keep the native pointer.
+    if (window.matchMedia('(pointer: coarse)').matches || prefersReducedMotion()) return
 
     const els = elsRef.current.filter(Boolean)
     if (els.length !== TRAILS.length) return
+
+    // Hide the native pointer only now that the custom one is live.
+    const root = document.documentElement
+    root.classList.add('has-custom-cursor')
 
     // Rotate all elements 45° so squares look like diamonds
     els.forEach(el => gsap.set(el, { rotation: 45, transformOrigin: 'center center' }))
@@ -134,6 +140,7 @@ export default function Cursor() {
     detectSection()
 
     return () => {
+      root.classList.remove('has-custom-cursor')
       cancelAnimationFrame(raf)
       gsap.killTweensOf(els)
       window.removeEventListener('mousemove', onMove)

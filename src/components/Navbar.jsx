@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
+import { Download } from 'lucide-react'
+import { RESUME_URL } from '@/lib/site'
+import { prefersReducedMotion } from '@/lib/motion'
 
 const NAV_LINKS = ['About', 'Skills', 'Projects', 'Experience', 'Contact']
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen]         = useState(false)
+  const [active, setActive]     = useState(null)
 
   const navRef      = useRef(null)
   const overlayRef  = useRef(null)
@@ -27,10 +31,29 @@ export default function Navbar() {
     gsap.set(linkRefs.current.filter(Boolean), { y: 52, opacity: 0 })
     gsap.set([dividerRef.current, footerRef.current], { opacity: 0 })
 
-    const onScroll = () => setScrolled(window.scrollY > 60)
+    // Scrolled state + which section is under the reading line
+    const onScroll = () => {
+      setScrolled(window.scrollY > 60)
+      const mid = window.scrollY + window.innerHeight * 0.4
+      let current = null
+      for (const link of NAV_LINKS) {
+        const el = document.getElementById(link.toLowerCase())
+        if (el && el.offsetTop <= mid) current = link
+      }
+      setActive(current)
+    }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // ── Esc closes the mobile menu ──────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
 
   // ── Animate open / close ────────────────────────────────────────────────
   useEffect(() => {
@@ -108,11 +131,12 @@ export default function Navbar() {
   }, [open])
 
   const scrollTo = (id) => {
+    const wasOpen = open
     setOpen(false)
     setTimeout(() => {
       const el = document.getElementById(id.toLowerCase())
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
-    }, 480)
+      if (el) el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    }, wasOpen ? 480 : 0)
   }
 
   return (
@@ -132,19 +156,43 @@ export default function Navbar() {
           </div>
 
           {/* Desktop links */}
-          <ul className="hidden md:flex items-center gap-10 list-none">
-            {NAV_LINKS.map((link) => (
-              <li key={link}>
+          <ul className="hidden md:flex items-center gap-9 list-none">
+            {NAV_LINKS.map((link) => {
+              const isActive = active === link
+              return (
+                <li key={link}>
+                  <a
+                    href={`#${link.toLowerCase()}`}
+                    onClick={(e) => { e.preventDefault(); scrollTo(link) }}
+                    aria-current={isActive ? 'location' : undefined}
+                    className={[
+                      'font-mono text-[0.75rem] tracking-[0.18em] uppercase hover:text-ink transition-colors duration-300 relative group py-1',
+                      isActive ? 'text-ink' : 'text-ink-muted',
+                    ].join(' ')}
+                  >
+                    {link}
+                    <span
+                      className={[
+                        'absolute bottom-0 left-0 h-px bg-amber transition-all duration-300 group-hover:w-full',
+                        isActive ? 'w-full' : 'w-0',
+                      ].join(' ')}
+                    />
+                  </a>
+                </li>
+              )
+            })}
+            {RESUME_URL && (
+              <li>
                 <a
-                  href={`#${link.toLowerCase()}`}
-                  onClick={(e) => { e.preventDefault(); scrollTo(link) }}
-                  className="font-mono text-[0.68rem] tracking-[0.2em] uppercase text-ink-muted hover:text-ink transition-colors duration-300 relative group"
+                  href={RESUME_URL}
+                  download
+                  className="inline-flex items-center gap-1.5 font-mono text-[0.75rem] tracking-[0.18em] uppercase text-amber hover:text-amber-light transition-colors duration-300 py-1"
                 >
-                  {link}
-                  <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-amber transition-all duration-300 group-hover:w-full" />
+                  Resume
+                  <Download size={13} aria-hidden="true" />
                 </a>
               </li>
-            ))}
+            )}
           </ul>
 
           {/* Hamburger */}
@@ -174,6 +222,7 @@ export default function Navbar() {
         ref={overlayRef}
         className="fixed inset-0 z-40 bg-canvas flex flex-col justify-center px-10 md:hidden overflow-hidden"
         aria-hidden={!open}
+        inert={open ? undefined : ''}
       >
         {/* Decorative amber divider */}
         <div
@@ -193,20 +242,35 @@ export default function Navbar() {
                 onClick={(e) => { e.preventDefault(); scrollTo(link) }}
                 className="flex items-baseline gap-4 py-3 group border-b border-edge first-of-type:border-t"
               >
-                <span className="font-mono text-[0.55rem] tracking-[0.2em] text-amber w-5 shrink-0 select-none">
+                <span className="font-mono text-[0.75rem] tracking-[0.16em] text-amber w-6 shrink-0 select-none" aria-hidden="true">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="font-display font-light text-[2rem] text-ink-muted group-hover:text-ink transition-colors duration-200 tracking-tight leading-none">
+                <span className={[
+                  'font-display font-light text-[2rem] group-hover:text-ink transition-colors duration-200 tracking-tight leading-none',
+                  active === link ? 'text-ink' : 'text-ink-muted',
+                ].join(' ')}>
                   {link}
                 </span>
               </a>
             </li>
           ))}
+          {RESUME_URL && (
+            <li ref={(el) => { linkRefs.current[NAV_LINKS.length] = el }}>
+              <a
+                href={RESUME_URL}
+                download
+                className="flex items-center gap-3 py-4 font-mono text-[0.8rem] tracking-[0.18em] uppercase text-amber"
+              >
+                Download resume
+                <Download size={15} aria-hidden="true" />
+              </a>
+            </li>
+          )}
         </ul>
 
         <div
           ref={footerRef}
-          className="absolute bottom-10 left-10 font-mono text-[0.55rem] tracking-[0.25em] uppercase text-ink-ghost"
+          className="absolute bottom-10 left-10 font-mono text-[0.75rem] tracking-[0.22em] uppercase text-ink-muted"
         >
           Muhammed Parvesh M
         </div>

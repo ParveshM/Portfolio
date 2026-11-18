@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
+import { prefersReducedMotion } from "@/lib/motion";
+import { ArrowRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const stats = [
@@ -22,6 +23,8 @@ export default function About() {
   const ref = useRef(null);
 
   useEffect(() => {
+    if (prefersReducedMotion()) return;
+
     const ctx = gsap.context(() => {
       gsap.from(".about-left-col", {
         opacity: 0,
@@ -196,7 +199,7 @@ export default function About() {
         <div className="mb-16">
           <div className="section-label">About</div>
           <h2 className="section-title">
-            Building with <em>purpose</em>
+            Hi, I'm <em>Parvesh</em>
           </h2>
         </div>
 
@@ -204,67 +207,64 @@ export default function About() {
           {/* Left col - sticky on desktop, inline on mobile */}
           <div className="about-left-col about-sticky-col">
             <div
-              className="font-display font-extrabold text-ink-ghost mb-10 select-none"
+              aria-hidden="true"
+              className="font-display font-extrabold text-ink-ghost mb-6 md:mb-10 select-none"
               style={{
-                fontSize: "clamp(5rem, 10vw, 9rem)",
+                fontSize: "clamp(3.5rem, 10vw, 9rem)",
                 lineHeight: 1,
                 letterSpacing: "-0.04em",
               }}
             >
               01
             </div>
-            <div className="flex flex-col gap-7">
+            <dl className="grid grid-cols-3 md:grid-cols-1 gap-4 md:gap-7">
               {stats.map((s) => (
                 <div
                   key={s.label}
-                  className="border-l-2 border-edge-strong pl-5"
+                  className="border-l border-edge-strong pl-3 md:pl-5 flex flex-col-reverse"
                 >
-                  <div className="text-[2.4rem] font-medium text-amber leading-none">
-                    {s.value}
-                  </div>
-                  <div className="font-mono text-[0.65rem] tracking-[0.16em] uppercase text-ink-muted mt-1.5">
+                  <dt className="font-mono text-[0.72rem] md:text-[0.75rem] tracking-[0.12em] uppercase text-ink-muted mt-1.5 leading-snug">
                     {s.label}
-                  </div>
+                  </dt>
+                  <dd className="text-[1.9rem] md:text-[2.4rem] font-medium text-amber leading-none tabular-nums">
+                    {s.value}
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </div>
 
           {/* Right content col */}
           <div className="about-right-col">
-            <div className="section-label">Who I Am</div>
-
-            <div className="text-[1.05rem] text-ink leading-[1.85] mb-10 space-y-5">
+            <div className="text-[1.05rem] text-ink leading-[1.85] mb-10 space-y-5 max-w-[66ch]">
               <p>
-                I'm a{" "}
+                I studied{" "}
                 <span className="text-amber-light font-medium">
-                  Full Stack Developer
-                </span>{" "}
-                with a passion for building web applications that are as fast as
-                they are beautiful. My core expertise lies in the React
-                ecosystem - crafting interfaces that feel effortless to use and
-                exceptional to look at.
-              </p>
-              <p>
-                Over the past year in professional development, I've shipped
-                production features across{" "}
-                <span className="text-amber-light font-medium">
-                  e-commerce, blockchain, and real-time platforms
+                  English literature
                 </span>
-                . I’m not just someone who writes code - I’m a problem solver
-                who uses code to build practical, scalable solutions.
+                , then taught myself to build for the web. Turns out both are
+                about structure and getting the details right.
               </p>
               <p>
-                Whether it's a client's first product or a complex integration,
-                I bring the same attention to detail: clean architecture,
-                performant code, and solutions that deliver real value.
+                For the last year and a half I've shipped production software —
+                at 369 Degree on blockchain and e-commerce platforms, and now at
+                NeenOpal on the frontend of GAfix. Freelance, I take projects
+                like TASTIN{" "}
+                <span className="text-amber-light font-medium">
+                  from first call to live site
+                </span>
+                : storefront, payments, order queue, deploy.
               </p>
+              <p>If you need a product built, I'd like to hear about it.</p>
             </div>
 
-            <Separator className="mb-8 bg-edge" />
+            <Separator className="mb-8 bg-edge max-w-[66ch]" />
 
             <Button asChild>
-              <a href="#contact">Let's build something →</a>
+              <a href="#contact">
+                Let's build something
+                <ArrowRight size={14} aria-hidden="true" />
+              </a>
             </Button>
           </div>
         </div>

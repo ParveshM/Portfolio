@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { prefersReducedMotion } from '@/lib/motion'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -10,6 +11,8 @@ export default function HeroCanvas() {
 
   useEffect(() => {
     const canvas = canvasRef.current
+    // Reduced motion: the form holds still (it can still be dragged by hand)
+    const reduced = prefersReducedMotion()
     let W = canvas.offsetWidth  || window.innerWidth
     let H = canvas.offsetHeight || window.innerHeight
 
@@ -73,7 +76,7 @@ export default function HeroCanvas() {
     }
 
     // ── Scroll-driven story: icosahedron brightens & swells, stays at peak ─
-    gsap.timeline({
+    if (!reduced) gsap.timeline({
       scrollTrigger: {
         trigger: '#hero',
         start: 'top top',
@@ -87,7 +90,7 @@ export default function HeroCanvas() {
 
     // ── Drag ─────────────────────────────────────────────────────────────
     let isDragging = false, lastX = 0, lastY = 0
-    let velX = 0, velY = 0, autoRotate = true
+    let velX = 0, velY = 0, autoRotate = !reduced
 
     const onMouseDown = (e) => {
       if (!hitsIco(e.clientX, e.clientY)) return
@@ -156,7 +159,7 @@ export default function HeroCanvas() {
         ico.rotation.y      += velX * 0.006
         ico.rotation.x      += velY * 0.006
         innerIco.rotation.y -= velX * 0.005
-        if (Math.abs(velX) < 0.01 && Math.abs(velY) < 0.01) autoRotate = true
+        if (!reduced && Math.abs(velX) < 0.01 && Math.abs(velY) < 0.01) autoRotate = true
         if (autoRotate) {
           ico.rotation.y      += 0.0025
           ico.rotation.x      += 0.001

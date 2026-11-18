@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import HeroCanvas from "./HeroCanvas";
+import { prefersReducedMotion } from "@/lib/motion";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&";
 
-const ROLES = [
-  "Full Stack Developer",
-  "React Specialist",
-  "Node.js Engineer",
-  "UI Craftsman",
-  "Problem Solver",
-];
+const ROLES = ["Full Stack Developer", "React Specialist", "Node.js Engineer"];
 
 // Deterministic particle positions (avoids re-randomization on re-render)
 const PARTICLES = [
@@ -96,6 +91,10 @@ export default function Hero() {
   const cleanupRef = useRef([]);
 
   useEffect(() => {
+    // Reduced motion: no scramble, scan line or role ticker — the static
+    // markup (name, first role, meta) is already the finished state.
+    if (prefersReducedMotion()) return;
+
     const ctx = gsap.context(() => {
       // ── Initial states ────────────────────────────────────────────────
       gsap.set(".scan-line", { top: 0, opacity: 0 });
@@ -105,13 +104,6 @@ export default function Hero() {
       gsap.set(".hero-role-wrap", { opacity: 0 });
       gsap.set(".hero-orb", { opacity: 0 });
 
-      // Measure and set up SVG drawing paths
-      const geoPaths = gsap.utils.toArray(".hero-geo-path", ref.current);
-      geoPaths.forEach((el) => {
-        const len = el.getTotalLength();
-        gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
-      });
-
       // Hide names (text pre-filled in JSX to reserve layout space)
       gsap.set([name1Ref.current, name2Ref.current], { opacity: 0 });
 
@@ -120,18 +112,6 @@ export default function Hero() {
 
       // Depth orbs fade in slowly
       tl.to(".hero-orb", { opacity: 1, duration: 2.5, stagger: 0.5 }, 0);
-
-      // SVG geometry draws on load
-      tl.to(
-        geoPaths,
-        {
-          strokeDashoffset: 0,
-          duration: 2.4,
-          ease: "power2.inOut",
-          stagger: 0.3,
-        },
-        0,
-      );
 
       // Scan line sweeps
       tl.to(".scan-line", { opacity: 1, duration: 0.08 }, 0.5);
@@ -297,7 +277,7 @@ export default function Hero() {
         {/* Content */}
         <div className="max-w-[1240px]  mx-auto px-5 sm:px-10 w-full relative z-10">
           {/* Eyebrow */}
-          <div className="hero-eyebrow font-mono text-[0.62rem] tracking-[0.3em] uppercase text-amber mb-5 sm:mb-10 flex items-center gap-3">
+          <div className="hero-eyebrow font-mono text-[0.75rem] tracking-[0.26em] uppercase text-amber mb-5 sm:mb-10 flex items-center gap-3">
             <span className="block w-6 h-px bg-amber shrink-0" />
             <span className="whitespace-nowrap">Software Developer</span>
             {!isMobile && (
@@ -307,11 +287,16 @@ export default function Hero() {
             )}
           </div>
 
-          {/* Name - pre-filled to reserve layout space, hidden until scramble fires */}
-          <div className="mb-1 leading-none">
+          {/* Name - pre-filled to reserve layout space, hidden until scramble fires.
+              aria-label keeps the accessible name stable while the scramble runs. */}
+          <h1
+            aria-label="Muhammed Parvesh"
+            className={`font-display leading-none ${isMobile ? "mb-3" : "mb-6"}`}
+          >
             <span
               ref={name1Ref}
-              className="font-display font-extrabold text-ink block"
+              aria-hidden="true"
+              className="font-extrabold text-ink block mb-1"
               style={{
                 fontSize: "clamp(1.6rem, 7.5vw, 8rem)",
                 letterSpacing: "-0.02em",
@@ -320,11 +305,10 @@ export default function Hero() {
             >
               MUHAMMED
             </span>
-          </div>
-          <div className={`leading-none ${isMobile ? "mb-3" : "mb-6"}`}>
             <span
               ref={name2Ref}
-              className="font-display font-semibold text-ink-muted block"
+              aria-hidden="true"
+              className="font-semibold text-ink-muted block"
               style={{
                 fontSize: "clamp(1.6rem, 7.5vw, 8rem)",
                 letterSpacing: "-0.02em",
@@ -333,7 +317,7 @@ export default function Hero() {
             >
               PARVESH
             </span>
-          </div>
+          </h1>
 
           {/* Looping role ticker - cycles through roles after load */}
           <div
@@ -342,7 +326,7 @@ export default function Hero() {
           >
             <span
               ref={roleRef}
-              className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-amber block leading-none pt-1"
+              className="font-mono text-[0.8rem] tracking-[0.2em] uppercase text-amber block leading-none pt-1"
             >
               Full Stack Developer
             </span>
@@ -352,25 +336,32 @@ export default function Hero() {
           <div
             className={`hero-meta flex ${isMobile ? "flex-col pt-4 gap-2" : "flex-row items-end justify-between pt-7 gap-5"}`}
           >
-            <div className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-ink-muted leading-relaxed">
+            <div className="font-mono text-[0.75rem] tracking-[0.22em] uppercase text-ink-muted leading-relaxed">
               <span className="text-ink font-bold">Full Stack</span> Developer
               <br />
-              <span className="text-[0.58rem] text-ink-muted tracking-[0.2em]">
+              <span className="text-[0.72rem] text-ink-muted tracking-[0.16em]">
                 React · Node.js · MongoDB · Express.js
               </span>
             </div>
-            {!isMobile && (
-              <p className="max-w-[260px] text-[0.83rem] text-ink-muted text-right leading-[1.65]">
-                Crafting performant, visually exceptional web experiences - from
-                concept to deployment.
-              </p>
-            )}
+            <p
+              className={
+                isMobile
+                  ? "max-w-[30ch] text-[0.95rem] text-ink-muted leading-[1.65] mt-4"
+                  : "max-w-[260px] text-[0.88rem] text-ink-muted text-right leading-[1.65]"
+              }
+            >
+              Crafting performant, visually exceptional web experiences — from
+              concept to deployment.
+            </p>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="hero-scroll-ind absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
-          <span className="font-mono text-[0.52rem] tracking-[0.38em] uppercase text-ink-ghost">
+        <div
+          className="hero-scroll-ind absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+          aria-hidden="true"
+        >
+          <span className="font-mono text-[0.7rem] tracking-[0.32em] uppercase text-ink-muted">
             scroll
           </span>
           <div className="scroll-line" />
